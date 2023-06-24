@@ -236,6 +236,7 @@ public class Shooter : MonoBehaviour
         }
         if (other.TryGetRigidbodyComponent(out Shield shield))
         { 
+            Destroy(shield.gameObject);
             PlayerPistol playerPistol = GetComponentInParent<PlayerPistol>();
             playerPistol.BecomeInvincible();
         }
