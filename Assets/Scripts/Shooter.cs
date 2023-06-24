@@ -12,25 +12,17 @@ public class Shooter : MonoBehaviour
     public bool isTripleShotEnabled; // Flag to enable triple shot
     public bool isProjectileSizeUpEnabled; // Flag to enable projectile size up
     public int bulletLevel; // Level of the projectile
-    public float projectileSizeMultiplier = 1f; // Multiplier to adjust the projectile size
+    public float sizeModifier = 0.5f; // Multiplier to adjust the projectile size
+    public Vector3 projectileScale;
+
     [Header("Debug")]
     [SerializeField] private float fireRate; // The adjusted fire rate
     [SerializeField] private float fireTimer; // Timer to track the fire rate
-    [SerializeField] private List<Vector3> initialScales = new List<Vector3>(); // Store the initial scales of the projectile prefabs
+    //[SerializeField] private List<Vector3> initialScales = new List<Vector3>(); // Store the initial scales of the projectile prefabs
 
     private void Start()
     {
         fireRate = baseFireRate / fireRateMultiplier;
-
-        // Store the initial scale of each projectile prefab
-        foreach (GameObject prefab in projectilePrefab)
-        {
-            Projectile projectileComponent = prefab.GetComponent<Projectile>();
-            if (projectileComponent != null)
-            {
-                initialScales.Add(projectileComponent.transform.localScale);
-            }
-        }
     }
 
     private void Update()
@@ -77,9 +69,8 @@ public class Shooter : MonoBehaviour
         if (projectileComponent != null)
         {
             projectileComponent.speed = CalculateProjectileSpeed();
-            ApplyProjectileSizeMultiplier(projectileComponent);
         }
-
+        projectile.transform.localScale = projectileScale;
         // Activate the projectile
         projectile.SetActive(true);
     }
@@ -109,13 +100,12 @@ public class Shooter : MonoBehaviour
             if (projectileComponent != null)
             {
                 projectileComponent.speed = CalculateProjectileSpeed();
-                ApplyProjectileSizeMultiplier(projectileComponent);
             }
 
             // Apply rotation to the additional projectiles
             float angle = 10f * i;
             projectile.transform.Rotate(Vector3.up, angle);
-
+            projectile.transform.localScale = projectileScale;
             // Activate the projectile
             projectile.SetActive(true);
         }
@@ -142,30 +132,9 @@ public class Shooter : MonoBehaviour
         isTripleShotEnabled = false;
     }
 
-    public void IncreaseProjectileSize(float sizeMultiplier)
+    public void AdjustSize(float sizeMultiplier)
     {
-        projectileSizeMultiplier *= sizeMultiplier;
-        projectileSizeMultiplier = Mathf.Max(projectileSizeMultiplier, 0.1f); // Ensure projectileSizeMultiplier doesn't go below 0.1
-
-        // Apply the size multiplier relative to the initial scale
-        foreach (GameObject prefab in projectilePrefab)
-        {
-            Projectile projectileComponent = prefab.GetComponent<Projectile>();
-            if (projectileComponent != null)
-            {
-                ApplyProjectileSizeMultiplier(projectileComponent);
-            }
-        }
-    }
-
-    private void ApplyProjectileSizeMultiplier(Projectile projectile)
-    {
-        int prefabIndex = projectilePrefab.IndexOf(projectile.gameObject);
-        if (prefabIndex >= 0 && prefabIndex < initialScales.Count)
-        {
-            Vector3 initialScale = initialScales[prefabIndex];
-            projectile.transform.localScale = initialScale * projectileSizeMultiplier;
-        }
+        projectileScale += new Vector3(sizeMultiplier, sizeMultiplier, sizeMultiplier);
     }
 
     private float CalculateProjectileSpeed()
@@ -252,9 +221,17 @@ public class Shooter : MonoBehaviour
 
         if(other.TryGetRigidbodyComponent(out SizeUpGate size)) 
         {
-            if (size.healthPoints > 0)
+            if (size.healthPoints >= 0 && size.healthPoints <= 25)
             {
-                IncreaseProjectileSize(2f);
+                AdjustSize(sizeModifier);
+            }
+            else if (size.healthPoints > 25 && size.healthPoints <= 50)
+            {
+                AdjustSize(sizeModifier * 2f);
+            }
+            else if (size.healthPoints >= -50 && size.healthPoints < 0)
+            {
+                AdjustSize(-sizeModifier);
             }
         }
     }

@@ -236,10 +236,10 @@ MonoBehaviour:
   isTripleShotEnabled: 0
   isProjectileSizeUpEnabled: 0
   bulletLevel: 0
-  projectileSizeMultiplier: 1
+  sizeModifier: 0.5
+  projectileScale: {x: 1, y: 1, z: 1}
   fireRate: 0
   fireTimer: 0
-  initialScales: []
 --- !u!1 &6915267244035610336
 GameObject:
   m_ObjectHideFlags: 0
