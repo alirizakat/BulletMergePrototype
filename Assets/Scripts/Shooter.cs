@@ -234,5 +234,10 @@ public class Shooter : MonoBehaviour
                 AdjustSize(-sizeModifier);
             }
         }
+        if (other.TryGetRigidbodyComponent(out Shield shield))
+        { 
+            PlayerPistol playerPistol = GetComponentInParent<PlayerPistol>();
+            playerPistol.BecomeInvincible();
+        }
     }
 }
